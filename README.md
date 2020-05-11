@@ -69,7 +69,7 @@ I would personally skip over the panic/frustration of making this [KMS for Javas
 - The final built file is called `encrypt.b.js`, `b` is for `bundle`, but you can use any name to build this file
 - Go back to `index.php`, you will see a line like this `myEncryptBundle.encrypt("Text to encrypt")`, this is how the NodeJS function is called.
 - Since `encrypt` and `decrypt` are an `async` function, which means a `Promise` is return, not the actual value, which also means that you need to use `then()` to handle the return value.
-- The returned value is a `base64` value.  Before base65, it is a `UintArray`.  So I use `TextEncoder` to do encode/decode.
+- The returned value is a `base64` value.  Before base64, it is a `UintArray`.  So I use `TextEncoder` to do encode/decode.
 - All the necessary code are in `encrypt.js`.  Please refer to that file for details.
 
 #### KMS in JS
