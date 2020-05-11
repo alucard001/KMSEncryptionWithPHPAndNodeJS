@@ -1,0 +1,6 @@
+.env
+*.lock
+*.b.js
+package-lock.json
+node_modules
+vendor
