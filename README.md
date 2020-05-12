@@ -80,4 +80,4 @@ I would personally skip over the panic/frustration of making this [KMS for Javas
 There are something I want to mention here:
 
 - `context`, according to [amazon](https://docs.aws.amazon.com/encryption-sdk/latest/developer-guide/concepts.html#encryption-context), it will store **non-secret** information.
-- **DANGER**: Since it is used on the front-end (browser) level, it is (at present) **unavoidable to expose all the AWS keys to public**.  Unless you are configuring suitable rights for account, please use it with caution.
+- **DANGER**: Since it is used on the front-end (browser) level, it is (at present) **unavoidable to expose all the AWS keys to public**.  But if you have an appropriate security policy and settings, it would be fine.
