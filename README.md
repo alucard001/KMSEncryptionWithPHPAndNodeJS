@@ -5,6 +5,9 @@
 - Use [Amazon KMS](https://docs.aws.amazon.com/encryption-sdk/latest/developer-guide/js-examples.html) in JS/NodeJS to encrypt/decrypt a string
 - Use KMS again to upload file (image) to Amazon S3 using PHP.
 
+### About Amazon KMS and S3
+You need to pay to use KMS and S3.  Yes, it costs money.
+
 ### About PHP upload to S3 using KMS
 
 I managed to do it all in a single `index.php` file.  Most of the PHP upload code should be familiar to you.
@@ -71,10 +74,10 @@ I would personally skip over the panic/frustration of making this [KMS for Javas
 - Since `encrypt` and `decrypt` are an `async` function, which means a `Promise` is return, not the actual value, which also means that you need to use `then()` to handle the return value.
 - The returned value is a `base64` value.  Before base64, it is a `UintArray`.  So I use `TextEncoder` to do encode/decode.
 - All the necessary code are in `encrypt.js`.  Please refer to that file for details.
-- **DANGER**: Since it is used on the front-end (browser) level, it is (at present) **unavoidable to expose all the AWS keys to public**.  Unless you are configuring suitable rights for account, please use it with caution.
 
 #### KMS in JS
 
 There are something I want to mention here:
 
 - `context`, according to [amazon](https://docs.aws.amazon.com/encryption-sdk/latest/developer-guide/concepts.html#encryption-context), it will store **non-secret** information.
+- **DANGER**: Since it is used on the front-end (browser) level, it is (at present) **unavoidable to expose all the AWS keys to public**.  Unless you are configuring suitable rights for account, please use it with caution.
