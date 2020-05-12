@@ -71,6 +71,7 @@ I would personally skip over the panic/frustration of making this [KMS for Javas
 - Since `encrypt` and `decrypt` are an `async` function, which means a `Promise` is return, not the actual value, which also means that you need to use `then()` to handle the return value.
 - The returned value is a `base64` value.  Before base64, it is a `UintArray`.  So I use `TextEncoder` to do encode/decode.
 - All the necessary code are in `encrypt.js`.  Please refer to that file for details.
+- **DANGER**: Since it is used on the front-end (browser) level, it is (at present) **unavoidable to expose all the AWS keys to public**.  Unless you are configuring suitable rights for account, please use it with caution.
 
 #### KMS in JS
 
