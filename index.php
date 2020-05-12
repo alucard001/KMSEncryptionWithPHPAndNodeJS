@@ -93,26 +93,6 @@ if(isset($_POST["submit"])) {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <script src="encrypt.b.js"></script>
-<script type="text/javascript">
-let p_encrypted = myEncryptBundle.encrypt("Text to encrypt")
-                    .then((r) => {
-                        console.log("[myEncryptBundle]encrypted: ", r);
-                        document.write("<p>encryptionBundle: " + r + "</p>");
-
-                        // Decrypt value
-                        let p_decrypted = myEncryptBundle.decrypt(r)
-                                            .then((decrypted) => {
-                                                console.log("[myEncryptBundle]decrypted: ", decrypted)
-                                                document.write("<p>decryptionBundle: " + decrypted + "</p>");
-                                            })
-                                            .catch((err) => {
-                                                console.log("[myEncryptBundle:decrypt:catch]err: ", err);
-                                            });
-                    })
-                    .catch((err) => {
-                        console.log("[myEncryptBundle:encrypt:catch]err: ", err);
-                   });
-</script>
 </head>
 <body>
 <form name="testupload" action="<?=$_SERVER['PHP_SELF'];?>" method="post" enctype="multipart/form-data">
@@ -120,4 +100,26 @@ let p_encrypted = myEncryptBundle.encrypt("Text to encrypt")
     <input type="file" name="fileToUpload" id="fileToUpload" />
     <input type="submit" value="Upload Image" name="submit" />
 </form>
+
+<script type="text/javascript">
+myEncryptBundle.encrypt("Text to encrypt")
+    .then((r) => {
+        console.log("[myEncryptBundle]encrypted: ", r);
+        // document.write("<p>encryptionBundle: " + r + "</p>");
+
+        // Decrypt value
+        let p_decrypted = myEncryptBundle.decrypt(r)
+                            .then((decrypted) => {
+                                console.log("[myEncryptBundle]decrypted: ", decrypted)
+                                // document.write("<p>decryptionBundle: " + decrypted + "</p>");
+                            })
+                            .catch((err) => {
+                                console.log("[myEncryptBundle:decrypt:catch]err: ", err);
+                            });
+    })
+    .catch((err) => {
+        console.log("[myEncryptBundle:encrypt:catch]err: ", err);
+    });
+</script>
+
 </body></html>
