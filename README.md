@@ -56,6 +56,20 @@ In case you don't know where to find some of the variables, don't panic.  Everyt
 
 Once completed, go to your Amazon S3 bucket and find your file.
 
+### KMS Basic
+
+- [KeyId](https://docs.aws.amazon.com/kms/latest/developerguide/concepts.html#key-id): Key identifiers **act as names** for your AWS KMS customer master keys (CMKs). They help you to recognize your CMKs in the console. You use them to indicate which CMKs you want to use in AWS KMS API operations, IAM policies, and grants.
+
+### KMS Quota
+
+Yes there is a quota for KMS.  [Read this](https://docs.aws.amazon.com/kms/latest/developerguide/resource-limits.html).
+
+- Customer Master Keys (CMKs): 10,000
+- Aliases: 10,000
+- Grants per CMK: 10,000
+- Grants for a given principal per CMK: 500
+- Key policy document size: 32 KB (32,768 bytes)
+
 ### KMS encrypt/decrypt using JS/NodeJS
 
 I would personally skip over the panic/frustration of making this [KMS for Javascript](https://docs.aws.amazon.com/encryption-sdk/latest/developer-guide/javascript-installation.html) works.  But here are some key points I want to mention:
