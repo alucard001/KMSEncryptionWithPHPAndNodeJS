@@ -58,7 +58,13 @@ Once completed, go to your Amazon S3 bucket and find your file.
 
 ### KMS Basic
 
-- [KeyId](https://docs.aws.amazon.com/kms/latest/developerguide/concepts.html#key-id): Key identifiers **act as names** for your AWS KMS customer master keys (CMKs). They help you to recognize your CMKs in the console. You use them to indicate which CMKs you want to use in AWS KMS API operations, IAM policies, and grants.
+- `GeneratorKeyId`: This key is used to generate a data key.
+- [`KeyId`](https://docs.aws.amazon.com/kms/latest/developerguide/concepts.html#key-id): Key identifiers **act as names** for your AWS KMS customer master keys (CMKs). They help you to recognize your CMKs in the console. You use them to indicate which CMKs you want to use in AWS KMS API operations, IAM policies, and grants.
+- Customer master keys (CMKs) [(source)](https://docs.aws.amazon.com/kms/latest/developerguide/concepts.html#master_keys) is the master key which is used to create other key.
+- Why there are so many keys?  How does it all works?  Simply put:
+  - Your app use CMKs to generate and encrypt data.
+  - CMK acts as GeneratorKeyId
+  - KeyId(s) are available keys to be used for CMKs.  Therefore in the program it is represented as array (`[]`).  However, in some case you can only use one key, like the one used in PHP upload.
 
 ### KMS Quota
 
@@ -94,4 +100,106 @@ I would personally skip over the panic/frustration of making this [KMS for Javas
 There are something I want to mention here:
 
 - `context`, according to [amazon](https://docs.aws.amazon.com/encryption-sdk/latest/developer-guide/concepts.html#encryption-context), it will store **non-secret** information.
-- **DANGER**: Since it is used on the front-end (browser) level, it is (at present) **unavoidable to expose all the AWS keys to public**.  But if you have an appropriate security policy and settings, it would be fine.
+- __**DANGER**: Since it is used on the front-end (browser) level, it is (at present) **unavoidable to expose all the AWS keys to public**.  But if you have an appropriate security policy and settings, it would be fine.__
+
+### Frequently Ask Questions/Problem
+
+- If you encounter "A Fallback is required because no subtle backend exists.", chances are you are using a browser that did not support the WebCrypto API, as described in [here](https://www.npmjs.com/package/@aws-crypto/client-browser#webcrypto-availability).  First, test in another broswer and see if it works.  If not, include other crypto fallback to make it work.  :D
+
+### Use specific accounts to limit access to KMS, S3 and other AMS resources, a.k.a. Account Security and Accessibility Control
+
+To skip all B.S. on why secuirty is important, here is the principle:
+
+- We only want specific account/role...  (Refer as IAM access management - Users, Roles)
+- to perform specific tasks... (Refer as Permissions Policies, including creating and updating)
+- on a specific Amazon resources (e.g. Keys, S3 bucket)... (Refer as [ARN - Amazon Resource Name](https://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html))
+
+Because of the above requirement, we need to:
+
+- Set up specific amazon user (Or role, but we focus on user here)
+- Create, or use existing, Permissions Policy
+- Find and tell the policy to only be applied to particular resources
+
+Here I am trying my best to explain it one by one.
+
+But first, login to IAM panel
+
+- Click on your name on the top right hand corner (as of 13 May 2020), then click **"My Security Credentials"**
+
+#### First, create, or use existing, Permissions Policy
+
+Before creating an user, you need an existing policy that can be applied to that user.  So create the policy first.
+
+##### Create KMS policy
+
+The purpose of this policy is to only allow user to encrypt and decrypt data through KMS.  Here is how
+
+- Click the **Policies** under Access management on the left side bar.
+- Click the **Create policy** blue button
+- Search `KMS` in "Service", then click on "KMS"
+![image](./doc/p001.jpg)
+- In "Actions", expand "Read" and select `DescribeKey`.  Expand "Write" and select `Encrypt`, `Decrypt`, `GenerateDataKey`, `GenerateRandom`, `ReEncryptFrom`, `ReEncryptTo`
+![image](./doc/p002.jpg)
+- In "Resources", you can either choose **Specific** to give access to specific resources (based on ARN) or **All resources**.  If you want to limit based on ARN, click on the **Add ARN** link.  The following popup will appear.  Copy the ARN (described below) and paste it to "Specify ARN for key", then click "Add"
+![image](./doc/p003.jpg)
+- To find ARN of a specific CMK, go to KMS panel (Click "Service" on the top navigation bar, search "kms", then click on "Key Management System")
+- Click on **Customer managed keys** on the left sidebar, then click on a specific key.  ARN is at the right side of the page.
+![image](./doc/p004.jpg)
+- "Any" in the popup box means allow all the Region/Account/Key id in the policy to do the things specified in "Action" above.
+- If you only want to apply this policy in special condition, click **Specify request conditions (optional)** link
+- Click **Review policy**
+- Enter the name (required) of the policy.  If you want to review what is in the policy, click the "KMS" link in "Summary".  Then click **Create policy** to finish.
+![image](./doc/p005.jpg)
+- A new policy is created.  You can always update it by clicking on it or remove the policy if it is not used anymore.
+![image](./doc/p006.jpg)
+
+##### Create S3 policy
+
+First, you need to find the ARN of your bucket
+
+- In "Services" menu on the top navigation bar, search "S3", and click on the "S3" item in the result drop-down
+- You should see a list of S3 bucket.  To get the ARN, select (**NOT** click on the name) the bucket and click the "Copy ARN" at the top.
+![image](./doc/b001.jpg)
+
+Now creating the policy.  Same steps applied in creating S3 policy.
+
+- Go to **Policies** > **Create policy**
+- Search `s3` and click on **S3** below
+- In "Action" > Access level > Read, select **GetObject**
+![image](./doc/b002.jpg)
+- In "Action" > Access level > Write, select **PutObject**
+![image](./doc/b003.jpg)
+- In "Resources", again you can choose to specific bucket or all buckets.  If you want to specify bucket, just paste the ARN you copy above and paste it in "Specify ARN for object".  In case the ARN is invalid, you can always enter the "Bucket name".  You can also specify policy to specific object name, or check "Any" to allow all access.  When completed, click "Add"
+![image](./doc/b004.jpg)
+- Click "Review policy", enter the policy name and click "Create policy" button, just like creating KMS policy.
+
+#### Set up specific amazon user
+
+- Click the blue "Add user" button to start adding user
+- Enter user name and check "Programmatic access", then click "Next: Permission"
+![image](./doc/u001.jpg)
+- Select "Attach existing policies directly", then search for the policy name you just created, then click **Next: Tags**
+![image](./doc/u002.jpg)
+- Create tag is optional.  It is only used to identify, using key-value pair, what this user is about.  Click **Next: Review** when done
+- You can review the details in this page.  If everything is fine, click **Create user**
+![image](./doc/u003.jpg)
+- **This page is important**: You can get the "Access key ID" and "Secret access key" here.  It is required to be defined in `.env` file.  You can click the **Show** link under "Secret access key" to copy the secret access key.  "Secret access key" can only be seen **ONCE**.
+- If you lose this key, you need to re-create the access key.  In the "Users" page select a specific user.  Then in the Summary page select "Security credentials" tab, below you should see a section called "Access keys".  Click on the "Create access key" to create one, like below
+![image](./doc/u004.jpg)
+- Each user can only have 2 access keys.  If for some unknown reason you need more than 2, you need to click on the X button on the right of the key to remove it.  Using "Make inactive" will not work.
+
+#### Apply Permissions policies to user
+
+Now it is time to apply policy to your newly created user.
+
+- Select the specific user ("Users" on the left, then click on specific user name)
+- In the "Summary" page, click "Add permissions" in the "Permissions" tab
+![image](./doc/a001.jpg)
+- In this page, select "Attach existing policies directly", then search for the policy you just created, check the box and click "Next: Review"
+![image](./doc/a002.jpg)
+- Review your permission, and click "Add permissions" at the bottom right hand corner to finish.
+![image](./doc/a003.jpg)
+- You should see a new "Permission" applied to this user.
+![image](./doc/a004.jpg)
+
+Hope it helps someone.
